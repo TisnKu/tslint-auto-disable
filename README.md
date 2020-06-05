@@ -12,7 +12,7 @@ This project is a fork of [tslint-auto-disable](https://github.com/paulkoerbitz/
 
 - upgrade to the latest typescript and tslint
 - better support for windows files with `\r\n` endings
-- remove previous tslint disable line comments (in case they are redundant) before add new tslint disable comments
+- remove previous tslint disable line comments (in case they are redundant) before adding new tslint disable comments
 
 ## SPECIAL NOTICE
 
