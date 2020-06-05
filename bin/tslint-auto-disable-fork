@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 global.RUN_FROM_COMMAND_LINE = true;
+console.error('tslint-auto-disable-fork is deprecated, please use tslint-auto-disable-enhanced instead.')
 require("../dist/src/index");

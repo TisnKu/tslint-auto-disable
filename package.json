@@ -1,15 +1,17 @@
 {
-  "name": "tslint-auto-disable-fork",
+  "name": "tslint-auto-disable-enhanced",
   "version": "0.0.8",
   "description": "A command-line tool to automatically insert disable comments for failing TSLint rules",
   "bin": {
-    "tslint-auto-disable-fork": "bin/tslint-auto-disable-fork"
+    "tslint-auto-disable-fork": "bin/tslint-auto-disable-fork",
+    "tslint-auto-disable-enhanced": "bin/tslint-auto-disable-enhanced"
   },
-  "repository": "git@github.com:paulkoerbitz/tslint-auto-disable.git",
-  "author": "Paul Koerbitz <paul.koerbitz@gmail.com>",
+  "repository": "git@github.com:TisnKu/tslint-auto-disable-enhanced.git",
+  "author": "Tianxi Ku <kutianxi@outlook.com>",
   "license": "MIT",
   "files": [
     "bin/tslint-auto-disable-fork",
+    "bin/tslint-auto-disable-enhanced",
     "dist/src/**/*.js"
   ],
   "devDependencies": {
