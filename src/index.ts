@@ -1,16 +1,14 @@
-import commander from "commander";
 import * as fs from "fs";
 import * as glob from "glob";
 import { filter as createMinimatchFilter, Minimatch } from "minimatch";
 import * as path from "path";
-import { Configuration, Linter, LintResult, Replacement, Utils } from "tslint";
+import { Configuration, Linter, LintResult, Replacement, RuleFailure } from "tslint";
 import * as ts from "typescript";
 import { SourceFile } from "typescript";
-import { Argv, getInputArguments, Options } from "./command";
+import { getInputOptions, Options } from "./command";
 import { removeTslintComments } from "./lintUtils";
 
 const { findConfiguration } = Configuration;
-const { arrayify } = Utils;
 
 export const enum Status {
     Ok = 0,
@@ -143,7 +141,7 @@ async function doLinting(
     const linter = new Linter(
         {
             fix: false,
-            rulesDirectory: options.rulesDirectory,
+            rulesDirectory: options.rulesDirectory
         },
         program
     );
@@ -200,14 +198,30 @@ function getLineBreak(fileContent: string) {
     return "\n";
 }
 
+function buildTslintComment(indent: string, failures: RuleFailure[], sourceFile: ts.SourceFile) {
+    return `${indent}// tslint:disable-next-line ${failures.map(failure => failure.getRuleName()).join(" ")}${getLineBreak(
+        sourceFile.text
+    )}`;
+}
+
 export const insertTslintDisableComments = (
     program: ts.Program,
     result: LintResult
 ) => {
-    const filesAndFixes = new Map<string, [number, Replacement][]>();
-    result.failures.forEach(input => {
-        const fileName = input.getFileName();
-        const line = input.getStartPosition().getLineAndCharacter().line;
+    const filesAndFixes = new Map<string, Replacement[]>();
+
+    const groupedFailures = result.failures.reduce((prev: Record<string, RuleFailure[]>, failure) => {
+        const key = failure.getFileName() + "#" + failure.getStartPosition().getLineAndCharacter().line;
+        if (prev.hasOwnProperty(key)) {
+            prev[key].push(failure);
+            return prev;
+        }
+        prev[key] = [failure];
+        return prev;
+    }, {});
+    Object.values(groupedFailures).forEach((failures: RuleFailure[]) => {
+        const fileName = failures[0].getFileName();
+        const line = failures[0].getStartPosition().getLineAndCharacter().line;
         const sourceFile = program.getSourceFile(fileName)!;
         const insertPos = sourceFile.getLineStarts()[line];
         const lineEnd = sourceFile.getLineEndOfPosition(insertPos);
@@ -218,18 +232,13 @@ export const insertTslintDisableComments = (
         const indent = maybeIndent != undefined ? maybeIndent[0] : "";
         const fix = Replacement.appendText(
             insertPos,
-            `${indent}// tslint:disable-next-line${getLineBreak(
-                sourceFile.text
-            )}`
+            buildTslintComment(indent, failures, sourceFile)
         );
-        const fixes = filesAndFixes.get(fileName);
-        if (fixes == undefined) {
-            filesAndFixes.set(fileName, [[line, fix]]);
-        } else if (fixes.findIndex(oldfix => oldfix[0] === line) < 0) {
-            fixes.push([line, fix]);
-            filesAndFixes.set(fileName, fixes);
+        if (filesAndFixes.has(fileName)) {
+            filesAndFixes.get(fileName)!.push(fix);
+        } else {
+            filesAndFixes.set(fileName, [fix]);
         }
-        // otherwise there is already a fix for the current line
     });
 
     const updatedSources = new Map<string, string>();
@@ -237,7 +246,7 @@ export const insertTslintDisableComments = (
         const source = program.getSourceFile(filename)!.text;
         updatedSources.set(
             filename,
-            Replacement.applyAll(source, fixes.map(x => x[1]))
+            Replacement.applyAll(source, fixes)
         );
     });
 
@@ -310,15 +319,7 @@ function findTsconfig(project: string): string | undefined {
     }
 }
 
-const argv: Argv = getInputArguments();
-
-run({
-    config: argv.config,
-    exclude: argv.exclude,
-    files: arrayify(commander.args),
-    project: argv.project,
-    rulesDirectory: argv.rulesDir,
-})
+run(getInputOptions())
     .then(rc => {
         process.exitCode = rc;
     })

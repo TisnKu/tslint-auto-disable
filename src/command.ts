@@ -1,5 +1,6 @@
 import { Utils } from "tslint";
 import commander from "commander";
+import { arrayify } from "tslint/lib/utils";
 
 const { dedent } = Utils;
 
@@ -201,6 +202,12 @@ function collect(val: string, memo: string[]) {
     return memo;
 }
 
-export const getInputArguments = () => {
-    return argv;
-};
+export const getInputOptions = () => {
+    return {
+        config: argv.config,
+        exclude: argv.exclude,
+        files: arrayify(commander.args),
+        project: argv.project,
+        rulesDirectory: argv.rulesDir
+    };
+}

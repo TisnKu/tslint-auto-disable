@@ -11,11 +11,12 @@ This project is a fork of [tslint-auto-disable](https://github.com/paulkoerbitz/
 - upgrade to the latest typescript and tslint
 - add support for windows files with `\r\n` endings
 - remove previous tslint disable line comments (in case they are redundant) before adding new tslint disable comments
+- add specific rules to disable, example `// tslint:disable-next-line no-any`
 
 # SPECIAL NOTICE
 
 - utf8-BOM encoded file will be converted to utf8 directly
-- make sure you have your project changes committed before running the script
+- please do commit project changes before running the script
 
 # Roadmap
 
