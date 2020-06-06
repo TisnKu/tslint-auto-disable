@@ -39,7 +39,7 @@
     "typescript": "^3.9.3"
   },
   "scripts": {
-    "test": "ts-node test/runner.ts",
+    "test": "ts-node test/runner.ts && jest",
     "build": "tsc",
     "prepublishOnly": "npm test && npm run build",
     "precommit": "lint-staged",

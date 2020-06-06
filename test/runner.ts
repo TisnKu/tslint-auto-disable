@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as glob from "glob";
 import _ from "lodash";
 import * as path from "path";
-import { runReplacement } from "../src";
+import { runReplacement } from "../src/addTslintCommentUtil";
 
 const promisify1 = <T1, R>(
     f: (arg1: T1, cb: (err: NodeJS.ErrnoException, result: R) => void) => void

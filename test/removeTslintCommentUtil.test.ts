@@ -1,5 +1,5 @@
-import { getTslintLineReplacement } from "../src/lintUtils";
 import { Replacement } from "tslint";
+import { getTslintLineReplacement } from "../src/removeTslintCommentUtil";
 
 describe("Remove tslint disable line comments", () => {
     it("should return empty replacement when line content does not contain tslint comment", () => {
