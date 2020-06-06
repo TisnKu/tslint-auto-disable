@@ -137,17 +137,6 @@ if (parsed.unknown.length !== 0) {
 }
 const argv = (commander.opts() as any) as Argv;
 
-if (
-    (global as any).RUN_FROM_COMMAND_LINE &&
-    argv.project === undefined &&
-    commander.args.length <= 0
-) {
-    console.error(
-        "No files specified. Use --project to lint a project folder."
-    );
-    process.exit(1);
-}
-
 export interface Options {
     /**
      * Path to a configuration file.
@@ -207,7 +196,7 @@ export const getInputOptions = () => {
         config: argv.config,
         exclude: argv.exclude,
         files: arrayify(commander.args),
-        project: argv.project,
-        rulesDirectory: argv.rulesDir
+        project: argv.project || "tsconfig.json",
+        rulesDirectory: argv.rulesDir,
     };
-}
+};

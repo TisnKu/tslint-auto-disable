@@ -1,4 +1,4 @@
-# tslint-auto-disable-enhanced
+tslint-auto-disable-enhanced
 
 This project is a fork of [tslint-auto-disable](https://github.com/paulkoerbitz/tslint-auto-disable). Thanks to Paul Koerbitz;
 
@@ -8,26 +8,29 @@ This project is a fork of [tslint-auto-disable](https://github.com/paulkoerbitz/
 
 # What's NEW 
 
-- upgrade to the latest typescript and tslint
 - add support for windows files with `\r\n` endings
 - remove previous tslint disable line comments (in case they are redundant) before adding new tslint disable comments
 - add specific rules to disable, example `// tslint:disable-next-line no-any`
 
-# SPECIAL NOTICE
+# Warning
 
 - utf8-BOM encoded file will be converted to utf8 directly
 - please do commit project changes before running the script
 
-# Roadmap
-
-- [ ] add specific rules to new added tslint disable comment
-
 # Installation and Usage
 
-tslint-auto-disable can be installed from npm:
+## tslint-auto-disable can be installed from npm:
 
 ```$ npm install tslint-auto-disable-enhanced```
 
-To use it, the `tsconfig.json` and `tslint.json` files must be specified:
+## Usage: 
 
-```$ npx tslint-auto-disable-enhanced -p tsconfig.json -c tslint.json```
+```$ npx tslint-auto-disable-enhanced```
+
+Default options:
+- project: `tsconfig.json` under current directory
+- config: `tslint.json` under current directory
+
+## Customize options
+
+```$ npx tslint-auto-disable-enhanced -p tsconfig.json -c tslint.json somedir/somefile.ts somefile.tsx```
