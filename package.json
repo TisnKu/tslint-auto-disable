@@ -1,6 +1,6 @@
 {
   "name": "tslint-auto-disable-enhanced",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "A command-line tool to automatically insert disable comments for failing TSLint rules",
   "bin": {
     "tslint-auto-disable-fork": "bin/tslint-auto-disable-fork",
@@ -47,7 +47,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "tslint --fix -p ./tsconfig.json -c ./tslint.json",
+      "tslint --fix -p tsconfig.json",
       "prettier --write",
       "git add"
     ]

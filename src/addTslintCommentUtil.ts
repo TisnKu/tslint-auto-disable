@@ -2,11 +2,18 @@ import * as fs from "fs";
 import * as glob from "glob";
 import { filter as createMinimatchFilter, Minimatch } from "minimatch";
 import * as path from "path";
-import { Configuration, Linter, LintResult, Replacement, RuleFailure } from "tslint";
+import {
+    Configuration,
+    Linter,
+    LintResult,
+    Replacement,
+    RuleFailure,
+} from "tslint";
 import * as ts from "typescript";
 import { SourceFile } from "typescript";
 import { Options } from "./command";
 import { removeTslintComments } from "./removeTslintCommentUtil";
+import _ from "lodash";
 
 const { findConfiguration } = Configuration;
 
@@ -141,7 +148,7 @@ async function doLinting(
     const linter = new Linter(
         {
             fix: false,
-            rulesDirectory: options.rulesDirectory
+            rulesDirectory: options.rulesDirectory,
         },
         program
     );
@@ -198,10 +205,15 @@ function getLineBreak(fileContent: string) {
     return "\n";
 }
 
-function buildTslintComment(indent: string, failures: RuleFailure[], sourceFile: ts.SourceFile) {
-    return `${indent}// tslint:disable-next-line ${failures.map(failure => failure.getRuleName()).join(" ")}${getLineBreak(
-        sourceFile.text
-    )}`;
+export function buildTslintComment(
+    indent: string,
+    failures: RuleFailure[],
+    lineBreak: string
+) {
+    return `${indent}// tslint:disable-next-line ${_.chain(failures)
+        .map(failure => failure.getRuleName())
+        .uniq()
+        .join(" ")}${lineBreak}`;
 }
 
 export const insertTslintDisableComments = (
@@ -210,15 +222,21 @@ export const insertTslintDisableComments = (
 ) => {
     const filesAndFixes = new Map<string, Replacement[]>();
 
-    const groupedFailures = result.failures.reduce((prev: Record<string, RuleFailure[]>, failure) => {
-        const key = failure.getFileName() + "#" + failure.getStartPosition().getLineAndCharacter().line;
-        if (prev.hasOwnProperty(key)) {
-            prev[key].push(failure);
+    const groupedFailures = result.failures.reduce(
+        (prev: Record<string, RuleFailure[]>, failure) => {
+            const key =
+                failure.getFileName() +
+                "#" +
+                failure.getStartPosition().getLineAndCharacter().line;
+            if (prev.hasOwnProperty(key)) {
+                prev[key].push(failure);
+                return prev;
+            }
+            prev[key] = [failure];
             return prev;
-        }
-        prev[key] = [failure];
-        return prev;
-    }, {});
+        },
+        {}
+    );
     Object.values(groupedFailures).forEach((failures: RuleFailure[]) => {
         const fileName = failures[0].getFileName();
         const line = failures[0].getStartPosition().getLineAndCharacter().line;
@@ -232,7 +250,7 @@ export const insertTslintDisableComments = (
         const indent = maybeIndent != undefined ? maybeIndent[0] : "";
         const fix = Replacement.appendText(
             insertPos,
-            buildTslintComment(indent, failures, sourceFile)
+            buildTslintComment(indent, failures, getLineBreak(sourceFile.text))
         );
         if (filesAndFixes.has(fileName)) {
             filesAndFixes.get(fileName)!.push(fix);
@@ -244,10 +262,7 @@ export const insertTslintDisableComments = (
     const updatedSources = new Map<string, string>();
     filesAndFixes.forEach((fixes, filename) => {
         const source = program.getSourceFile(filename)!.text;
-        updatedSources.set(
-            filename,
-            Replacement.applyAll(source, fixes)
-        );
+        updatedSources.set(filename, Replacement.applyAll(source, fixes));
     });
 
     return updatedSources;
