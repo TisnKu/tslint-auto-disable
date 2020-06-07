@@ -1,6 +1,6 @@
 {
   "name": "tslint-auto-disable-enhanced",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A command-line tool to automatically insert disable comments for failing TSLint rules",
   "bin": {
     "tslint-auto-disable-fork": "bin/tslint-auto-disable-fork",
@@ -40,7 +40,7 @@
   },
   "scripts": {
     "test": "ts-node test/runner.ts && jest",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "prepublishOnly": "npm test && npm run build",
     "precommit": "lint-staged",
     "prettier:fix": "prettier --write \"src/**/*.ts\""
